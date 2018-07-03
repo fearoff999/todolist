@@ -76,6 +76,23 @@ func isTomorrow(t time.Time) bool {
 		nowDay == timeDay
 }
 
+func isThisWeek(t time.Time) bool {
+	nowYear, nowWeek := time.Now().ISOWeek()
+	timeYear, timeWeek := t.ISOWeek()
+	return nowYear == timeYear &&
+		nowWeek == timeWeek
+}
+
+func isNextWeek(t time.Time) bool {
+	nowYear, nowWeek := time.Now().ISOWeek()
+	timeYear, timeWeek := t.ISOWeek()
+	fantasyYear, fantasyWeek := time.Now().AddDate(0, 0, 7).ISOWeek()
+	return nowYear == timeYear &&
+		nowWeek + 1 == timeWeek ||
+		fantasyYear == timeYear &&
+		fantasyWeek == timeWeek
+}
+
 func isPastDue(t time.Time) bool {
 	return time.Now().After(t)
 }

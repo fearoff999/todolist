@@ -25,7 +25,7 @@ func NewScreenPrinter() *ScreenPrinter {
 }
 
 func (f *ScreenPrinter) Print(groupedTodos *GroupedTodos, printNotes bool) {
-	cyan := color.New(color.FgCyan).SprintFunc()
+	blue := color.New(color.FgHiBlue).SprintFunc()
 
 	var keys []string
 	for key := range groupedTodos.Groups {
@@ -34,13 +34,13 @@ func (f *ScreenPrinter) Print(groupedTodos *GroupedTodos, printNotes bool) {
 	sort.Strings(keys)
 
 	for _, key := range keys {
-		fmt.Fprintf(f.Writer, "\n %s\n", cyan(key))
+		fmt.Fprintf(f.Writer, "\n %s\n", blue(key))
 		for _, todo := range groupedTodos.Groups[key] {
 			f.printTodo(todo)
 			if printNotes {
 				for nid, note := range todo.Notes {
 					fmt.Fprintf(f.Writer, "   %s\t%s\t\n",
-						cyan(strconv.Itoa(nid)), note)
+						blue(strconv.Itoa(nid)), note)
 				}
 			}
 		}
@@ -49,28 +49,37 @@ func (f *ScreenPrinter) Print(groupedTodos *GroupedTodos, printNotes bool) {
 }
 
 func (f *ScreenPrinter) printTodo(todo *Todo) {
-	yellow := color.New(color.FgYellow)
+	white := color.New(color.FgWhite)
 	if todo.IsPriority {
-		yellow.Add(color.Bold, color.Italic)
+		white.Add(color.Bold, color.Italic)
 	}
-	fmt.Fprintf(f.Writer, " %s\t%s\t%s\t%s\t\n",
-		yellow.SprintFunc()(strconv.Itoa(todo.Id)),
+	fmt.Fprintf(f.Writer, " %s\t%s\t%s\t %s\n",
+		white.SprintFunc()(strconv.Itoa(todo.Id)),
 		f.formatCompleted(todo.Completed),
 		f.formatDue(todo.Due, todo.IsPriority),
 		f.formatSubject(todo.Subject, todo.IsPriority))
 }
 
 func (f *ScreenPrinter) formatDue(due string, isPriority bool) string {
-	blue := color.New(color.FgBlue)
+	yellow := color.New(color.FgYellow)
+	hiYellow := color.New(color.FgHiYellow)
 	red := color.New(color.FgRed)
+	hiRed := color.New(color.FgHiRed)
+	white := color.New(color.FgWhite)
+	green := color.New(color.FgGreen)
+	hiGreen := color.New(color.FgHiGreen)
 
 	if isPriority {
-		blue.Add(color.Bold, color.Italic)
+		yellow.Add(color.Bold, color.Italic)
 		red.Add(color.Bold, color.Italic)
+		hiYellow.Add(color.Bold, color.Italic)
+		hiRed.Add(color.Bold, color.Italic)
+		green.Add(color.Bold, color.Italic)
+		hiGreen.Add(color.Bold, color.Italic)
 	}
 
 	if due == "" {
-		return blue.SprintFunc()(" ")
+		return white.SprintFunc()(" ")
 	}
 	dueTime, err := time.Parse("2006-01-02", due)
 
@@ -81,25 +90,31 @@ func (f *ScreenPrinter) formatDue(due string, isPriority bool) string {
 	}
 
 	if isToday(dueTime) {
-		return blue.SprintFunc()("today")
+		return hiRed.SprintFunc()("today")
 	} else if isTomorrow(dueTime) {
-		return blue.SprintFunc()("tomorrow")
+		return yellow.SprintFunc()("tomorrow")
+	} else if isNextWeek(dueTime) {
+		return green.SprintFunc()("nextweek")
+	} else if isThisWeek(dueTime) {
+		return hiYellow.SprintFunc()("thisweek")
 	} else if isPastDue(dueTime) {
 		return red.SprintFunc()(dueTime.Format("Mon Jan 2"))
 	} else {
-		return blue.SprintFunc()(dueTime.Format("Mon Jan 2"))
+		return hiGreen.SprintFunc()(dueTime.Format("Mon Jan 2"))
 	}
 }
 
 func (f *ScreenPrinter) formatSubject(subject string, isPriority bool) string {
 
-	red := color.New(color.FgRed)
-	magenta := color.New(color.FgMagenta)
+	hiBlue := color.New(color.FgHiBlue)
+	hiYellow := color.New(color.FgHiYellow)
+	hiWhite := color.New(color.FgHiWhite)
 	white := color.New(color.FgWhite)
 
 	if isPriority {
-		red.Add(color.Bold, color.Italic)
-		magenta.Add(color.Bold, color.Italic)
+		hiBlue.Add(color.Bold, color.Italic)
+		hiYellow.Add(color.Bold, color.Italic)
+		hiWhite.Add(color.Bold, color.Italic)
 		white.Add(color.Bold, color.Italic)
 	}
 
@@ -111,9 +126,9 @@ func (f *ScreenPrinter) formatSubject(subject string, isPriority bool) string {
 
 	for _, word := range splitted {
 		if projectRegex.MatchString(word) {
-			coloredWords = append(coloredWords, magenta.SprintFunc()(word))
+			coloredWords = append(coloredWords, hiBlue.SprintFunc()(word))
 		} else if contextRegex.MatchString(word) {
-			coloredWords = append(coloredWords, red.SprintFunc()(word))
+			coloredWords = append(coloredWords, hiWhite.SprintFunc()(word))
 		} else {
 			coloredWords = append(coloredWords, white.SprintFunc()(word))
 		}
@@ -123,9 +138,12 @@ func (f *ScreenPrinter) formatSubject(subject string, isPriority bool) string {
 }
 
 func (f *ScreenPrinter) formatCompleted(completed bool) string {
+	green := color.New(color.FgHiGreen)
+	red := color.New(color.FgHiRed)
+
 	if completed {
-		return "[x]"
+		return "[" + green.SprintFunc()("v") + "]"
 	} else {
-		return "[ ]"
+		return "[" + red.SprintFunc()("x") + "]"
 	}
 }

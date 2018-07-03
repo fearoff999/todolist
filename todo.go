@@ -147,36 +147,55 @@ func routeInput(command string, input string) {
 	switch command {
 	case "l", "ln", "list", "agenda":
 		app.ListTodos(input)
+	case "lc":
+		app.ListTodos("by c")
+	case "lp":
+		app.ListTodos("by p")
 	case "a", "add":
 		app.AddTodo(input)
+		app.ListTodos("by c")
 	case "done":
 		app.AddDoneTodo(input)
+		app.ListTodos("by c")
 	case "d", "delete":
 		app.DeleteTodo(input)
+		app.ListTodos("by c")
 	case "c", "complete":
 		app.CompleteTodo(input)
+		app.ListTodos("by c")
 	case "uc", "uncomplete":
 		app.UncompleteTodo(input)
+		app.ListTodos("by c")
 	case "ar", "archive":
 		app.ArchiveTodo(input)
+		app.ListTodos("by c")
 	case "uar", "unarchive":
 		app.UnarchiveTodo(input)
+		app.ListTodos("by c")
 	case "ac":
 		app.ArchiveCompleted()
+		app.ListTodos("by c")
 	case "e", "edit":
 		app.EditTodo(input)
+		app.ListTodos("by c")
 	case "ex", "expand":
 		app.ExpandTodo(input)
+		app.ListTodos("by c")
 	case "an", "n", "dn", "en":
 		app.HandleNotes(input)
+		app.ListTodos("by c")
 	case "gc":
 		app.GarbageCollect()
+		app.ListTodos("by c")
 	case "p", "prioritize":
 		app.PrioritizeTodo(input)
+		app.ListTodos("by c")
 	case "up", "unprioritize":
 		app.UnprioritizeTodo(input)
+		app.ListTodos("by c")
 	case "init":
 		app.InitializeRepo()
+		app.ListTodos("by c")
 	case "web":
 		if err := app.Load(); err != nil {
 			os.Exit(1)
